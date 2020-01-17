@@ -61,7 +61,7 @@ public class Classification implements Runnable {
 		}
 		
 		TestSuite bestPerforming = getBestPerforming();
-		System.out.println(Arrays.toString(bestPerforming.f.coefficients));
+		System.out.println(bestPerforming.f);
 	}
 
 }

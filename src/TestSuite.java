@@ -12,12 +12,12 @@ public class TestSuite implements Runnable {
 		this.data = data;
 		this.rnd = new Random();
 		
-		double[] coefficients = new double[3];
+		double[] coefficients = new double[1];
 		for (int i = 0; i < coefficients.length; i++) {
 			coefficients[i] = 20 * (rnd.nextDouble() - 0.5);
 		}
 		
-		this.f = new Function(coefficients);
+		this.f = new Function(coefficients, (rnd.nextDouble() - 0.5) * 100,(rnd.nextDouble() - 0.5) * 100);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class TestSuite implements Runnable {
 			}
 		}
 		
-		performance = 1.0 * correctGuesses / data.size();
+		performance = 2 * (1.0 * correctGuesses / data.size() - 0.5);
 		
 		System.out.println("Performance: " + performance);
 	}
