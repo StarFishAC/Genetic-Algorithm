@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Classification implements Runnable {
 	
@@ -9,17 +11,21 @@ public class Classification implements Runnable {
 	double averageHeight;
 	double averageWeigth;
 	
-	TestSuite[] testSuites;
+	ArrayList<TestSuite> testSuites;
 	TestSuite bestPerforming;
 	volatile int generation;
 	
 	Controller ctrl;
 	volatile boolean done;
 	
+	ExecutorService executor;
+	
 	public Classification(Controller ctrl) {
 		this.ctrl = ctrl;
 		this.data = new ArrayList<>();
-		this.testSuites = new TestSuite[10];
+		this.testSuites = new ArrayList<>();
+		
+		this.executor = Executors.newCachedThreadPool();
 	}
 
 	public void loadDataFromFile() {
@@ -48,14 +54,10 @@ public class Classification implements Runnable {
 	}
 	
 	public void generateTestSuites() {
-		for (int i = 0; i < testSuites.length; i++) {
-			if (testSuites[i] == null) {
-				testSuites[i] = new TestSuite(data, averageHeight, averageWeigth);
-			} else {
-				
-			}
+		for (int i = 0; i < 20; i++) {
+			testSuites.add(new TestSuite(data, averageHeight, averageWeigth));
 		}
-		this.bestPerforming = testSuites[0];
+		bestPerforming = testSuites.get(0);
 	}
 	
 	public TestSuite getBestPerforming() {
@@ -70,17 +72,24 @@ public class Classification implements Runnable {
 
 	@Override
 	public void run() {
-		for (generation = 0; generation < 2000; generation++) {
-			for (TestSuite testSuite : testSuites) {
-				testSuite.run();
+		for (generation = 0; generation < 10000; generation++) {
+			
+			try {
+				executor.invokeAll(testSuites);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+			
 			bestPerforming = getBestPerforming();
+			
 			for (TestSuite testSuite : testSuites) {
 				if (!bestPerforming.equals(testSuite)) {
-					testSuite.mutate(bestPerforming.f);
+					testSuite.mutateBy(bestPerforming.f);
 				}
 			}
 		}
+		
+		System.out.println(bestPerforming.f);
 		
 		done = true;
 		ctrl.update();

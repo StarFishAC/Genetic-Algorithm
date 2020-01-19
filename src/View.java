@@ -9,18 +9,19 @@ import javax.swing.JLabel;
 public class View extends JLabel {
 	
 	Classification classification;
-	BufferedImage img;
+	BufferedImage frame;
+	BufferedImage dataImg;
 	
 	public View(Classification classification) {
 		this.classification = classification;
-		this.img = new BufferedImage(1280, 720, BufferedImage.TYPE_INT_ARGB);
+		this.dataImg = new BufferedImage(1280, 720, BufferedImage.TYPE_INT_ARGB);
 		
-		Graphics2D g = img.createGraphics();
+		Graphics2D g = dataImg.createGraphics();
 		for (Person person : classification.data) {
 			int x = (int) (5 * person.height);
-			int y = (int) (img.getHeight() - 5 * person.weigth);
+			int y = (int) (dataImg.getHeight() - 5 * person.weigth);
 			
-			int rgb = img.getRGB(x, y);
+			int rgb = dataImg.getRGB(x, y);
 			if (person.gender == Gender.MALE) {
 				rgb += new Color(0, 0, 255, 32).getRGB();
 			} else {
@@ -35,7 +36,7 @@ public class View extends JLabel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		g.drawImage(img, 0, 0, null);
+		g.drawImage(frame, 0, 0, null);
 		g.drawString("Performance: " + classification.bestPerforming.performance, 10, 20);
 		g.drawString("Generation: " + classification.generation, 10, 30);
 		if (classification.done) {
@@ -56,23 +57,24 @@ public class View extends JLabel {
 			g.drawString("" + y, 10, 720 - y * 5);
 			g.drawLine(0, 720 - y * 5, getWidth(), 720 - y * 5);
 		}
-		
-		plotFunctions(g);
 	}
 	
-	private void plotFunctions(Graphics g) {
+	public void plotFunctions() {
+		frame = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = frame.createGraphics();
+		
+		g.drawImage(dataImg, 0, 0, null);
+		
 		for (TestSuite testSuite : classification.testSuites) {
 			g.setColor(testSuite.equals(classification.bestPerforming) ? new Color(0, 0, 0, 16) : new Color(0, 0, 0, 0));
 			
-			if (!testSuite.equals(classification.bestPerforming)) {
-				continue;
-			}
-			
-			Function f = testSuite.f;
-			for (double x = 0; x < getWidth() / 5; x+=0.01) {
-				double y = f.getValueFor(x);
-				
-				g.fillRect((int) (5 * x) - 1, (int) (img.getHeight() - 5 * y) - 1, 3, 3);
+			if (testSuite.equals(classification.bestPerforming)) {
+				Function f = testSuite.f;
+				for (double x = 0; x < getWidth() / 5; x+=0.01) {
+					double y = f.getValueFor(x);
+					
+					g.fillRect((int) (5 * x) - 1, (int) (720 - 5 * y) - 1, 3, 3);
+				}
 			}
 		}
 	}

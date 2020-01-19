@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
-public class TestSuite implements Runnable {
+public class TestSuite implements Callable<Void> {
 	
 	Function f;
 	Random rnd;
@@ -14,14 +15,30 @@ public class TestSuite implements Runnable {
 		
 		double[] coefficients = new double[3];
 		for (int i = 0; i < coefficients.length; i++) {
-			coefficients[i] = 0.01 * (rnd.nextDouble() - 0.5);
+			coefficients[i] = (rnd.nextDouble() - 0.5);
 		}
 		
 		this.f = new Function(coefficients, averageHeight, averageWeigth);
 	}
+	
+	public void mutateBy(Function function) {
+		for (int i = 0; i < f.coefficients.length; i++) {
+			f.coefficients[i] = function.coefficients[i] + (0.05 * (rnd.nextDouble() - 0.5));
+		}
+		f.offsetX = function.offsetX + 5 * (rnd.nextDouble() - 0.5);
+		f.offsetY = function.offsetY + 5 * (rnd.nextDouble() - 0.5);
+	}
+	
+	public void mutateRandom() {
+		for (int i = 0; i < f.coefficients.length; i++) {
+			f.coefficients[i] = (rnd.nextDouble() - 0.5);
+		}
+		f.offsetX += (2 * (rnd.nextDouble() - 0.5));
+		f.offsetY += (2 * (rnd.nextDouble() - 0.5));
+	}
 
 	@Override
-	public void run() {
+	public Void call() throws Exception {
 		int correctGuesses = 0;
 		
 		for (Person person : data) {
@@ -40,14 +57,8 @@ public class TestSuite implements Runnable {
 		}
 		
 		performance = 1.0 * correctGuesses / data.size();
-	}
-	
-	public void mutate(Function function) {
-		for (int i = 0; i < f.coefficients.length; i++) {
-			f.coefficients[i] = function.coefficients[i] + (0.1 * (rnd.nextDouble() - 0.5));
-		}
-		f.offsetX = function.offsetX + (0.1 * (rnd.nextDouble() - 0.5));
-		f.offsetY = function.offsetY + (0.1 * (rnd.nextDouble() - 0.5));
+		
+		return null;
 	}
 
 }
