@@ -62,12 +62,17 @@ public class View extends JLabel {
 	
 	private void plotFunctions(Graphics g) {
 		for (TestSuite testSuite : classification.testSuites) {
-			g.setColor(testSuite.equals(classification.bestPerforming) ? Color.BLACK : new Color(0, 0, 0, 0));
+			g.setColor(testSuite.equals(classification.bestPerforming) ? new Color(0, 0, 0, 16) : new Color(0, 0, 0, 0));
+			
+			if (!testSuite.equals(classification.bestPerforming)) {
+				continue;
+			}
+			
 			Function f = testSuite.f;
 			for (double x = 0; x < getWidth() / 5; x+=0.01) {
 				double y = f.getValueFor(x);
 				
-				g.drawLine((int) (5 * x), (int) (img.getHeight() - 5 * y), (int) (5 * x), (int) (img.getHeight() - 5 * y));
+				g.fillRect((int) (5 * x) - 1, (int) (img.getHeight() - 5 * y) - 1, 3, 3);
 			}
 		}
 	}
